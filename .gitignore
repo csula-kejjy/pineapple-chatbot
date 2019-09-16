@@ -1,0 +1,17 @@
+.DS_Store
+
+.gradle
+/build/
+
+tags*
+
+dest/
+.idea/
+
+bin
+.settings
+.classpath
+.project
+.vscode
+.build
+*.pyc

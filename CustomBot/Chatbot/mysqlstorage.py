@@ -22,7 +22,7 @@ class MySQLStorage:
 
 		self.cursor = self.database.cursor(buffered=True)
 
-		self.base_query = "SELECT url, keywords FROM spider WHERE term = %s"
+		self.base_query = "SELECT url, keywords FROM crawler WHERE term = %s"
 
 	def get_urls(self, intent, slot):
 		result = []

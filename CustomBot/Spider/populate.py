@@ -10,7 +10,7 @@ stopWords = set(stopwords.words('english'))
 with open(file, "r", encoding='utf-8') as f:
     #query = "INSERT INTO links (keywords, url) VALUES (%s, %s)"
 
-    query = "INSERT INTO spider (term, url, keywords) VALUES (%s, %s, %s)"
+    query = "INSERT INTO crawler (term, url, keywords) VALUES (%s, %s, %s)"
     for line in f:
         regexLoc = line.find(": {")
         url = line[:regexLoc].strip()

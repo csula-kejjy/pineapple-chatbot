@@ -15,3 +15,6 @@ bin
 .vscode
 .build
 *.pyc
+
+react-app/node_modules/
+.vs/

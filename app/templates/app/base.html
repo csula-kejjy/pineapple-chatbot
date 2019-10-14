@@ -1,0 +1,115 @@
+﻿{% load static %}
+
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, inital-scale=1, shrink-to-fit=no" />
+    <title>Pineapple Chatbot</title>
+    <!--import text fonts from google APIs-->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:300,300i,400,400i,600,600i,700,700i" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,400i,600,600i,700,700i" />
+    <!--import bootstrap-->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <!--import stylesheets-->
+    <link rel="stylesheet" href="{% static '/css/app.css' %}">
+    <link rel="stylesheet" href="{% static '/css/csula_1.css' %}">
+    <link rel="stylesheet" href="{% static '/css/csula_2.css' %}">
+    <link rel="stylesheet" href="{% static '/css/csula_3.css' %}">
+    <link rel="stylesheet" href="{% static '/css/csula_4.css' %}">
+    <link rel="stylesheet" href="{% static '/css/csula_5.css' %}">
+    <link rel="stylesheet" href="{% static '/css/csula_6.css' %}">
+    <link rel="stylesheet" href="{% static '/css/csula_7.css' %}">
+    <link rel="stylesheet" href="{% static '/css/csula_8.css' %}">
+
+</head>
+<body>
+
+    <!--render template for header-->
+    {% block header %}
+    {% endblock header %}
+    
+    <!--container holding a row of two columns-->
+    <div class="container-fluid">
+
+        <!--row of two columns-->
+        <div class="d-flex align-items-stretch row">
+
+            <!--column one, contains the content on the left hand side-->
+            <div class="text-center border col">
+                <img class="logo" src="https://upload.wikimedia.org/wikipedia/en/f/f7/CSU%2C_Los_Angeles_seal.svg" alt="Cal state la logo" />
+                <h2>Welcome to CSULA's Pineapple Chatbot</h2>
+                <p>Lorem ipsum lacinia neque auctor tempor imperdiet fames sem viverra curae porttitor, etiam class aliquam proin sollicitudin metus nam at aenean feugiat aliquam, integer turpis congue lectus venenatis aenean senectus curabitur sit sem.</p>
+                <ui>
+                    <li>
+                        Senectus gravida ante nisi iaculis quam varius posuere dapibus ultricies, venenatis consequat ipsum elementum ad leo sapien ornare vitae, erat libero at a quis pretium nunc curabitur
+                    </li>
+                    <li>
+                        Massa himenaeos malesuada hac viverra turpis consequat vulputate dictumst taciti fusce vehicula interdum tempus hac pretium sociosqu porttitor tortor turpis.
+                    </li>
+                    <li>
+                        Magna sapien dictum class lacus nam neque porttitor turpis, erat interdum praesent mi at varius placerat habitasse senectus sit sollicitudin ut ligula morbi ut condimentum sed class odio.
+                    </li>
+                    <li>
+                        Aliquam iaculis vulputate vitae morbi eu velit condimentum, inceptos consectetur interdum eros nulla metus torquent congue
+                    </li>
+                </ui>
+            </div>
+
+            <!--column two, contains the content on the right hand side-->
+            <div class="border col">
+
+                <!--card with acts as the message board-->
+                <div class="card">
+                    <div class="card-body">Some text</div>
+                </div>
+
+                <!--form element with a text input field and a submit button-->
+                <form class="d-flex align-content-center flex-wrap form-background" method="POST" id="new_message_form">
+
+                    <!--Django form token-->
+                    {% csrf_token %}
+
+                    <div class="margin-right flex-grow-1">
+
+                        <!--input field that takes the user's message-->
+                        <input type="text" class="form-control" id="user_message" name="user_message" placeholder="Type your question here..." />
+                    </div>
+                    <div>
+
+                        <!--submit button that submits the form-->
+                        <button type="submit" class="csula-yellow btn btn-primary">Enter</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!--import jquery-->
+    <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
+    <!--import popper-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <!--import bootstrap JS-->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <!--script that handles the user's message and it's response-->
+    <script type="text/javascript">
+
+        //on submit from element with id #new_message_form
+        $(document).on('submit', '#new_message_form', function (e) {
+            //first, prevent the page from reloading
+            e.preventDefault();
+
+            //ajax POST call
+            $.ajax({
+                type: 'POST',
+                url: '/message',
+                data: {
+                    user_message: $('#user_message').val(),
+                    csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val()
+                },
+                success: function () {
+                }
+            });
+        });
+    </script>
+</body>
+</html>

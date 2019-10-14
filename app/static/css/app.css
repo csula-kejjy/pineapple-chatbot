@@ -1,0 +1,43 @@
+.max-height {
+
+    border: solid;
+    border-color: black;
+    height: 100%;
+}
+
+.form-background {
+    background-color: #222222;
+    padding: 1em;
+    margin: 0;
+    height: 10%
+}
+.row {
+    height: 100%;
+}
+
+.card {
+    height: 90%;
+    width: 100%;
+}
+
+.csula-yellow {
+    background-color: #FFCE00;
+    color: #222222;
+    border-color: #FFCE00;
+    padding-left: 2em;
+    padding-right: 2em;
+}
+
+.csula-yellow:hover {
+    background-color: #FFBF00;
+    border-color: #FFBF00;
+    color: #222222;
+}
+
+.margin-right {
+    margin-right: 2em;
+}
+
+.container-fluid {
+    margin-top: 7em;
+}

@@ -24,8 +24,14 @@ def handle_message(request):
 
 		print(lex_response)
 		print(user_message)
+		print(lex_response['message'])
+
+		message = f"""
+		<div class='btn btn-primary'>{user_message}</div>
+		<div class='btn btn-primary'>{lex_response['message']}</div>
+		"""
 
 	else:
 		print('Request is not a POST method!')
 
-	return HttpResponse('')
+	return HttpResponse(message)

@@ -60,7 +60,7 @@
 
                 <!--card with acts as the message board-->
                 <div class="card">
-                    <div class="card-body">Some text</div>
+                    <div id="to_be_updated" class="card-body">Some text</div>
                 </div>
 
                 <!--form element with a text input field and a submit button-->
@@ -97,7 +97,8 @@
         $(document).on('submit', '#new_message_form', function (e) {
             //first, prevent the page from reloading
             e.preventDefault();
-
+            let user_message = $('#user_message').val()
+            document.getElementById('to_be_updated').innerHTML += `<div class='btn btn-primary'>${user_message}</div>`
             //ajax POST call
             $.ajax({
                 type: 'POST',
@@ -106,7 +107,9 @@
                     user_message: $('#user_message').val(),
                     csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val()
                 },
-                success: function () {
+                success: function(data) {
+                    console.log(data);
+                    document.getElementById('to_be_updated').innerHTML += "<br>" + data;
                 }
             });
         });

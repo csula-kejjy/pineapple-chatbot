@@ -1,43 +1,65 @@
-.max-height {
-
-    border: solid;
-    border-color: black;
-    height: 100%;
+body {
+    position: absolute;
+    overflow: auto;
 }
 
-.form-background {
-    background-color: #222222;
-    padding: 1em;
-    margin: 0;
-    height: 10%
-}
-.row {
-    height: 100%;
-}
+    .container-fluid {
+        margin-top: 7em;
+    }
 
-.card {
-    height: 90%;
-    width: 100%;
-}
+        .row {
+            height: 100%;
+        }
 
-.csula-yellow {
-    background-color: #FFCE00;
-    color: #222222;
-    border-color: #FFCE00;
-    padding-left: 2em;
-    padding-right: 2em;
-}
+            .col {
 
-.csula-yellow:hover {
-    background-color: #FFBF00;
-    border-color: #FFBF00;
-    color: #222222;
-}
+            }
 
-.margin-right {
-    margin-right: 2em;
-}
+                .chatbox {
+                    display: flex;
+                    flex-direction: column;
+                    height: 100%;
+                }
 
-.container-fluid {
-    margin-top: 7em;
-}
+                    .chatbot-message {
+                        background: #FFCE00;
+                        color: #222222;
+                        border-radius: 2em;
+                        padding: 0.25em;
+                        align-self: flex-start;
+                        margin: 0.5em;
+                    }
+
+                    .user-message {
+                        background: #222222;
+                        color: #FFFFFF;
+                        border-radius: 2em;
+                        padding: 0.25em;
+                        align-self: flex-end;
+                        margin: 0.5em;
+                    }
+
+                .form-background {
+                    background-color: #222222;
+                    padding: 1em;
+                    margin: 0;
+                    height: 10%
+                }   
+                
+                    .margin-right {
+                        margin-right: 2em;
+                    }
+
+                        .csula-yellow {
+                            background-color: #FFCE00;
+                            color: #222222;
+                            border-color: #FFCE00;
+                            padding-left: 2em;
+                            padding-right: 2em;
+                        }
+
+                        .csula-yellow:hover {
+                            background-color: #FFBF00;
+                            border-color: #FFBF00;
+                            color: #222222;
+                        }

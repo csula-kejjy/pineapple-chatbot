@@ -35,7 +35,7 @@
         <div class="d-flex align-items-stretch row">
 
             <!--column one, contains the content on the left hand side-->
-            <div class="text-center border col">
+            <div class="text-center col">
                 <img class="logo" src="https://upload.wikimedia.org/wikipedia/en/f/f7/CSU%2C_Los_Angeles_seal.svg" alt="Cal state la logo" />
                 <h2>Welcome to CSULA's Pineapple Chatbot</h2>
                 <p>Lorem ipsum lacinia neque auctor tempor imperdiet fames sem viverra curae porttitor, etiam class aliquam proin sollicitudin metus nam at aenean feugiat aliquam, integer turpis congue lectus venenatis aenean senectus curabitur sit sem.</p>
@@ -56,11 +56,16 @@
             </div>
 
             <!--column two, contains the content on the right hand side-->
-            <div class="border col">
+            <div class="border-left border-dark col">
 
                 <!--card with acts as the message board-->
-                <div class="card">
-                    <div id="to_be_updated" class="card-body">Some text</div>
+                <div id="to_be_updated" class="chatbox">
+                    <div class="chatbot-message">
+                        Hello, how can I help you?
+                    </div>
+                    <div class="user-message">
+                        Some question is asked
+                    </div>
                 </div>
 
                 <!--form element with a text input field and a submit button-->
@@ -97,8 +102,10 @@
         $(document).on('submit', '#new_message_form', function (e) {
             //first, prevent the page from reloading
             e.preventDefault();
-            let user_message = $('#user_message').val()
-            document.getElementById('to_be_updated').innerHTML += `<div class='btn btn-primary'>${user_message}</div>`
+            let time = Date.now();
+            let user_message = $('#user_message').val();
+            document.getElementById('to_be_updated').innerHTML += "test";
+
             //ajax POST call
             $.ajax({
                 type: 'POST',

@@ -1,8 +1,13 @@
 from .modules.chatbot.simple_chatbot import SimpleChatBot
 from django.http import HttpResponse
 from django.shortcuts import render
-from io import BytesIO
-import boto3, simplejson, pprint, sys, urllib.parse as urlparse
+import boto3, sys
+
+sys.path.insert(1, '/system')
+
+from system.credentials import Credentials
+
+cred = Credentials()
 # Create your views here.
 
 def app(request):
@@ -12,7 +17,7 @@ def handle_message(request):
 
 	if request.method == 'POST':
 
-		bot = SimpleChatBot("Chad", user="enriq", password="P@ssword1", database="chatbot_dev")
+		bot = SimpleChatBot("Chad", user=cred.user, password=cred.password, database=cred.database_name)
 		user_message = request.POST['user_message']
 		
 		input_dictionary = {'input': user_message}

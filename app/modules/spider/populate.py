@@ -1,9 +1,14 @@
-import mysql.connector
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
+import mysql.connector, sys
 
+sys.path.insert(1, '/system')
+
+from system.credentials import Credentials
+
+cred = Credentials()
 file = 'calstatela4/crawledDict.txt'
-db = mysql.connector.connect(user="enriq", password="P@ssword1", database="chatbot_dev")
+db = mysql.connector.connect(user=cred.user, password=cred.password, database=cred.database_name)
 cursor = db.cursor()
 stopWords = set(stopwords.words('english'))
 

@@ -16804,7 +16804,7 @@ body {
 #bottom {
     background: #1b1b1b;
     color: #fff;
-    margin-top: 100px;
+    margin-top: 0;
 }
 
 @media (max-width:767px) {

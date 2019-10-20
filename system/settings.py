@@ -11,6 +11,9 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+from .credentials import Credentials
+
+cred = Credentials()
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -77,10 +80,10 @@ WSGI_APPLICATION = 'system.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'chatbot_dev',
-		'USER': 'enriq',
-		'PASSWORD': 'P@ssword1',
-		'HOST': 'localhost',
+        'NAME': cred.database_name,
+		'USER': cred.user,
+		'PASSWORD': cred.password,
+		'HOST': cred.host,
     }
 }
 
@@ -109,7 +112,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Los_Angeles'
 
 USE_I18N = True
 

@@ -1,14 +1,13 @@
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
 from difflib import SequenceMatcher
-import re
-import spacy
+import re, spacy
 
 class DataExtractor:
-    MODEL_PATH = '/new-model/'
+    MODEL_PATH = "/spacy/new_model"
 
     def __init__(self):
-        self.nlp = spacy.load(DataExtractor.MODEL_PATH)
+        self.nlp = spacy.load('en_pineapple')
 
         self.intent_dict = {'GetEmails':'EMAIL', 'GetOfficeRoom':'ROOM', 'GetPhoneNum':'PHONE'}
 

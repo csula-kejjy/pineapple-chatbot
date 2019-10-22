@@ -1,0 +1,11 @@
+django
+boto3
+mysql-connector-python
+nltk
+beautifulsoup4
+rake_nltk
+pprint
+awscli
+simplejson
+mysqlclient
+spacy

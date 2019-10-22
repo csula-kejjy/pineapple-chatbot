@@ -1,0 +1,108 @@
+html {
+    min-height: 100%;
+    max-height: 100%;
+}
+
+body {
+    overflow: auto;
+}
+
+    .container-fluid {
+        margin-top: 6.3em;
+    }
+
+        .row {
+
+        }
+
+            .col {
+                margin: 0;
+                padding: 0;
+                height: 60em;
+            }
+                .instructions {
+                    padding-top: 2em;
+                    padding-left: 2em;
+                    padding-right: 2em;
+                }
+
+                .chatbox {
+                    display: flex;
+                    flex-direction: column;
+                }
+
+                .chatbot-msg-container, .user-msg-container{
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                }
+
+                .user-msg-container {
+                    margin-right: 2em;
+                    align-self: flex-end;
+                }
+
+                .chatbot-msg-container {
+                    margin-left: 2em;
+                }
+
+                    .chatbot-message, .user-message {
+                        border-radius: 2em;
+                        padding: 0.25em;
+                        padding-right: 1em;
+                        padding-left: 1em;
+                        margin: 0.5em;
+                        margin-top: 1.5em;
+                    }
+
+                    .chatbot-message {
+                        background: #FFCE00;
+                        color: #222222;
+                    }
+
+                    .user-message {
+                        background: #222222;
+                        color: #FFFFFF;
+                    }
+                    
+                    .chatbot-icon, .user-icon {
+                        margin-top: 1em;
+                        width: 3em;
+                        height: 3em;
+                        border-radius: 50%;
+                    }
+
+                    .timestamp {
+                        margin-top: 3em;
+                        font-size: 10px;
+                    }
+
+                .user-input {
+                    background-color: #222222;
+                    padding: 1em;
+                    margin: 0;
+                    margin-top: 2em;
+                    height: 10%
+                }   
+                    
+                    .voice {
+                        font-size: 9px;
+                    }
+                
+                    .margin-right {
+                        margin-right: 2em;
+                    }
+
+                        .csula-yellow {
+                            background-color: #FFCE00;
+                            color: #222222;
+                            border-color: #FFCE00;
+                            padding-left: 2em;
+                            padding-right: 2em;
+                        }
+
+                        .csula-yellow:hover, .btn-primary:disabled {
+                            background-color: #FFBF00;
+                            border-color: #FFBF00;
+                            color: #222222;
+                        }

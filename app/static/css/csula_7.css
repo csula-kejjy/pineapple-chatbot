@@ -1,0 +1,49 @@
+#header #navigation .region-navigation, #header #navigation .region-navigation2 {
+    max-width: inherit;
+}
+
+div .alert-block {
+    background-color: #fff;
+    color: #000;
+    margin-top: 18px !important;
+    margin-left: -15px !important;
+    margin-right: -15px !important;
+    text-align: center;
+}
+
+    div .alert-block p {
+        border-bottom: 6px solid #c00;
+        color: #000;
+        font-size: 1.3em;
+        line-height: 1.4em;
+        margin: 0 auto;
+        padding: 15px 14px 14px 14px;
+        text-align: center;
+    }
+
+@media (max-width:1112px) {
+    #header.nav-transparent {
+        background: transparent;
+    }
+
+    #header #navigation {
+        display: inherit;
+        background: transparent;
+    }
+
+    #navigation .main-menu {
+        display: none;
+    }
+
+    #navigation .logo-block {
+        display: none !important;
+    }
+
+    div .alert-block {
+        margin-top: 0 !important;
+    }
+
+        div .alert-block p {
+            font-size: 1em;
+        }
+}

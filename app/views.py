@@ -1,7 +1,7 @@
 from .modules.chatbot.simple_chatbot import SimpleChatBot
 from django.http import HttpResponse
 from django.shortcuts import render
-import boto3, sys
+import boto3, sys, speech_recognition as sr
 
 sys.path.insert(1, '/system')
 
@@ -13,11 +13,13 @@ cred = Credentials()
 def app(request):
 	return render(request, 'app/base.html', {})
 
-def handle_message(request):
+def handle_message(request, transcription=None):
 
 	if request.method == 'POST':
 
 		bot = SimpleChatBot("Chad", user=cred.user, password=cred.password, database=cred.database_name)
+
+		print(transcription)
 		user_message = request.POST['user_message']
 		
 		input_dictionary = {'input': user_message}
@@ -70,3 +72,33 @@ def handle_message(request):
 		return HttpResponse('Non-POST response')
 
 	return HttpResponse('No http method was made!')
+
+def handle_listen(request):
+
+	if request.method == 'POST':
+
+		# obtain audio from the microphone
+
+		# create our Recognizer, which will handle receving and transcribing speech-to-text
+		r = sr.Recognizer()
+
+		# with our microphone set as default...
+		with sr.Microphone() as source:
+			print("Say something!")
+
+			# listen to the microphone and save the recording
+			audio = r.listen(source)
+
+		# recognize speech using Google Speech Recognition
+		try:
+			# for testing purposes, we're just using the default API key
+			# to use another API key, use `r.recognize_google(audio, key="GOOGLE_SPEECH_RECOGNITION_API_KEY")`
+			# instead of `r.recognize_google(audio)`
+			print("Google Speech Recognition thinks you said " + r.recognize_google(audio))
+			print(r.recognize_google(audio))
+			#request.POST['user_message'] = r.recognize_google(audio)
+			handle_message(request, r.recognize_google(audio))
+		except sr.UnknownValueError:
+			print("Google Speech Recognition could not understand audio")
+		except sr.RequestError as e:
+			print("Could not request results from Google Speech Recognition service; {0}".format(e))

@@ -20,6 +20,11 @@ body {
                 padding: 0;
                 height: 60em;
             }
+
+                .bullets {
+                    padding-left: 2em;
+                }
+
                 .instructions {
                     padding-top: 2em;
                     padding-left: 2em;
@@ -31,7 +36,7 @@ body {
                     flex-direction: column;
                 }
 
-                .chatbot-msg-container, .user-msg-container{
+                .chatbot-msg-container, .user-msg-container, .control-container {
                     display: flex;
                     flex-direction: row;
                     align-items: center;
@@ -77,7 +82,7 @@ body {
                         font-size: 10px;
                     }
 
-                .user-input {
+                .control-container {
                     background-color: #222222;
                     padding: 1em;
                     margin: 0;
@@ -86,9 +91,15 @@ body {
                 }   
                     
                     .voice {
-                        font-size: 9px;
-                    }
+                        width: 1.8em;
+                        height: 1.75em;
+
+                    } 
                 
+                    .margin-left {
+                        margin-left: 2em;
+                    }
+
                     .margin-right {
                         margin-right: 2em;
                     }

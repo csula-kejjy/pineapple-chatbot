@@ -24,9 +24,9 @@ def handle_message(request):
 		runtime_client = boto3.client("lex-runtime")
 
 		lex_response = runtime_client.post_text(
-					botName='CSULA_ITS_CHATBOT',
-					botAlias='CHATBOT_DEV',
-					userId='01',
+					botName='CHANGE_ME',
+					botAlias='CHANGE_ME',
+					userId='CHANGE_ME',
 					inputText=str(input_dictionary['input'])
 				)
 

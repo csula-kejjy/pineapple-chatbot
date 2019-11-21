@@ -54,3 +54,5 @@ wasabi==0.2.2
 wcwidth==0.1.7
 webencodings==0.5.1
 wrapt==1.10.11
+
+.\app\modules\chatbot\models\pineapple_1_0\en_pineapple-2.2.0\dist\en_pineapple-2.2.0.tar.gz

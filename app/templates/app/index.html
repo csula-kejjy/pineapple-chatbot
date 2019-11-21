@@ -71,7 +71,7 @@
                         {% csrf_token %}
 
                         <!--button that starts listening-->
-                        <button type="submit" class="csula-yellow btn btn-primary">
+                        <button id="listen_btn" type="submit" class="csula-yellow btn btn-primary">
                             <img class="voice" alt="Speech to text button" src="static/images/speech_to_text.png">
                         </button>
                     </form>
@@ -117,6 +117,19 @@
 
             //update scroll to the bottom
             element.scrollTop = element.scrollHeight;
+        }
+
+        function listenStyle(action) {
+            if (action === "ON") {
+                document.getElementById("listen_btn").style.backgroundColor = "red";
+
+                document.getElementById("listen_btn").style.borderColor = "red";
+            }
+            if (action === "OFF") {
+                document.getElementById("listen_btn").style.backgroundColor = "#FFCE00";
+
+                document.getElementById("listen_btn").style.borderColor = "#FFCE00";
+            }
         }
         //insert starting message from chatbot, it's not a call to Lex API.
         document.getElementById('chatbox').innerHTML +=
@@ -200,15 +213,52 @@
 
         $(document).on('submit', '#listen', function (e) {
             e.preventDefault();
-
+            listenStyle("ON");
             $.ajax({
                 type: 'POST',
                 url: '/listen',
                 data: {
                     csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
                 },
-                success: function (data) {
-                    console.log(data);
+                success: function (transcription) {
+                    console.log(transcription);
+                    listenStyle("OFF");
+                    document.getElementById('chatbox').innerHTML +=
+                    `
+                        <div class="user-msg-container">
+                            <time class="font-weight-light timestamp">
+                                {% now "f A" %}
+                            </time>
+                            <div class="shadow user-message">
+                                ${transcription}
+                            </div>
+                            <img class="shadow user-icon" src="{% static '/images/user_icon.png' %}">
+                        </div>
+                    `;
+                    
+                    $.ajax({
+                        type: 'POST',
+                        url: '/message',
+                        data: {
+                            user_message: transcription,
+                            csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+                        },
+                        success: function (data) {
+                            document.getElementById('chatbox').innerHTML +=
+                                `
+                                <div class="chatbot-msg-container">
+                                    <img class="shadow border border-dark chatbot-icon" src="{% static '/images/pineapple_chatbot_logo.png' %}">
+                                    <div class="shadow chatbot-message">
+                                        ${data}
+                                    </div>
+                                    <time class="font-weight-light timestamp">
+                                        {% now "f A" %}
+                                    </time>
+                                </div>
+                            `;
+                        }
+                    });
+
                 }
             })
         });

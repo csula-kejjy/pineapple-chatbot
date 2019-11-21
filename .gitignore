@@ -18,3 +18,5 @@ bin
 
 react-app/node_modules/
 .vs/
+
+query_database.py

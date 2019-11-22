@@ -1,7 +1,7 @@
 from django.http import HttpResponse
 from django.shortcuts import render
 from .modules.chatbot.simplechatbot import SimpleChatbot
-import boto3, sys, speech_recognition as sr, time
+import boto3, sys, speech_recognition as sr, time, spacy
 
 sys.path.insert(1, '/system')
 
@@ -75,46 +75,80 @@ def call_lex(message):
 
 	#if not message: return
 
-	input_dictionary = {'input': message}
-
-	lex_response = runtime_client.post_text(
-				botName='CSULA_ITS_CHATBOT',
-				botAlias='CHATBOT_DEV',
-				userId='01',
-				inputText=str(input_dictionary['input'])
-			)
-
-	print(f"\n\nLex's Response: {lex_response}\n\n")
-
-	dialogState = str(lex_response.get('dialogState', 'Could not get dialogState from lex response json'))
-
-	print(f"\n\nDialog State is: {dialogState}\n\n")
-	# if the dialog state is 'ReadyForFulfillment'
+	nlp = spacy.load("en_pineapple")
 	
-	if dialogState == 'Fulfilled':
+	doc = nlp(message)
 
-		# from lex's response, get the 'intentName' parameter, otherwise throw an error.
-		intent = str(lex_response.get('intentName','Could not get intent.'))
-		
-		# from lex's response, get the 'slots' and 'name' parameters, otherwise throw an error.
-		entity = str(lex_response.get('slots','Could not get slot.').get('professor_name','Could not get slot data.'))
-			
-		print('\n\n\n--\nYour intent is to: ' + intent)
-		print('Your entity is: ' + entity + '\n--\n')
+	ent_dic = {}
 
-		# call bot's get_response() method, passing it the user's message, intent and entity
-		bot_response = str(bot.get_response(input_dictionary["input"], intent, entity))
+	for ent in doc.ents:
 
-		print(f"\n\nSimpleChatbot's response: {bot_response}\n\n")
-		
-		return bot_response
+		key = str(ent.label_) + ''
+		if ent.label_ in ent_dic:
+			ent_dic[key].append(str(ent)) if not str(ent) in ent_dic[key] else print(f'The entity: {ent} is already in the array')
+		else: 
+			ent_dic[key] = [str(ent)]
 
-	# if the dialog state is NOT 'ReadyForFulfillment'
+	if 'email' in message:
+		intent = 'GetEmail'
+	elif 'phone' in message:
+		intent = 'GetPhoneNumber'
+	elif 'office' in message:
+		intent = 'GetOfficeNumber'
 	else:
+		intent = ''
 
+	print(message)
+	print(intent)
+	print(ent_dic)
+
+	print(f"""Based on the user's response: {message}...\nTheir intent is: {intent}\n
+		""")
+	if not intent:
 		# call bot's get_link() method, passing it the user's message
-		bot_response = str(bot.get_link(input_dictionary["input"]))
+		bot_response = str(bot.get_link(message))
 		print(bot_response)
 
 		return bot_response
+	else:
+		print(f'\n\n\n--\nYour intent is to: {intent}')
+		print(f'Your entity is: {ent_dic}\n--\n')
+
+		# call bot's get_response() method, passing it the user's message, intent and entity
+		return bot.get_response(message, intent, ent_dic)
+
+
+	#input_dictionary = {'input': message}
+
+	#lex_response = runtime_client.post_text(
+	#			botName='CSULA_ITS_CHATBOT',
+	#			botAlias='CHATBOT_DEV',
+	#			userId='01',
+	#			inputText=str(input_dictionary['input'])
+	#		)
+
+	#print(f"\n\nLex's Response: {lex_response}\n\n")
+
+	#dialogState = str(lex_response.get('dialogState', 'Could not get dialogState from lex response json'))
+
+	#print(f"\n\nDialog State is: {dialogState}\n\n")
+	## if the dialog state is 'ReadyForFulfillment'
+	
+	#if dialogState == 'Fulfilled':
+
+	#	# from lex's response, get the 'intentName' parameter, otherwise throw an error.
+	#	intent = str(lex_response.get('intentName','Could not get intent.'))
+		
+	#	# from lex's response, get the 'slots' and 'name' parameters, otherwise throw an error.
+	#	entity = str(lex_response.get('slots','Could not get slot.').get('professor_name','Could not get slot data.'))
+			
+
+
+	#	print(f"\n\nSimpleChatbot's response: {bot_response}\n\n")
+		
+	#	return bot_response
+
+	## if the dialog state is NOT 'ReadyForFulfillment'
+
+
 

@@ -1,9 +1,10 @@
 ﻿from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
-from difflib import SequenceMatcher
 from .mysqlstorage import MySQLStorage
 import mysql.connector as mc, re, spacy
 import pandas as pd
+import Levenshtein as SequenceMatcher
+from .extract_email_phone_room import extract_email_phone_room as extract
 
 class SimpleChatbot:
 	"""
@@ -40,14 +41,25 @@ class SimpleChatbot:
 
 		# Split the entity at every ' ' character
 		# i.e 'this is some entity' -> ['this', 'is', 'some', 'entity']
-		entity = entity.split(" ")
+		entity = entity['PERSON'][0].replace("'s",'')
 
 		print(f'\nQuerying the database...\n\tintent: {intent}\n\tentity: {entity}')
 
 		# query the database based on the intent and the last element word from the entity array
-		database_df = self.storage.query(intent, entity[-1])
+		database_df = self.storage.query(intent, entity)
 
 		print(f'\nResponse from database saved...')
+		if intent:
+			email_phone_room = extract(database_df.iloc[0]['keywords'])
+			print(email_phone_room)
+
+			if 'GetEmail' in intent:
+				return email_phone_room['EMAIL']
+			elif 'GetPhoneNumber' in intent:
+				return email_phone_room['PHONE']
+			elif 'GetOfficeNumber' in intent:
+				return email_phone_room['ROOM']
+			
 
 		if intent == 'GetEmail':
 			print(f'\nFinding three closest emails that match: {entity[-1]}')
@@ -63,22 +75,29 @@ class SimpleChatbot:
 		:param data: a dataframe which must contain a column named keywords. Keywords is a single string.
 		:type data: str
 		"""
-
+		print('test')
 		# Empty array to hold unique emails
 		no_dp_email = []
 
 		# Loop through each row in the dataframe...
 		for row in data.itertuples():
+			print('test')
 
 			# Parse through the row's keywords string for emails...
 			emails = re.findall("[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}", row.keywords)
+			print(emails)
+			print('test')
 
 			# For each email in the array...
 			for email in emails:
+				print('test')
+
 				email = str(email)
 
 				# Append this email onto the array if it is not a repeat
 				if email not in no_dp_email:
+					print('test')
+
 					no_dp_email.append(email)
 		
 		# return array of unique emails
@@ -95,23 +114,24 @@ class SimpleChatbot:
 
 		# Creating an empty Dataframe with column names only
 		df = pd.DataFrame(columns=['entity', 'score'])
+		print('test')
 
 		# Loop through each email...
 		for email in emails:
-
+			print('test')
 			# Append a new row at the bottom: (email, comparison between this email and the entity provided)
 			df = df.append(
 					{
 						'entity': email,
-						'score': round(SequenceMatcher(None, email, entity).ratio(), 3)*1000
+						'score': round(SequenceMatcher.jaro(email, entity), 3)*1000
 					},
 					ignore_index=True)
-
+			print('test')
 		# Sort the dataframe by highest to lowest score
 		df = df.sort_values(by=['score'], ascending=False)
-		
+		print('test')
 		# Concatinate a string with the top 3 scoring emails
-		answer = f"\nHere are a few possible answers:\n{df.iloc[0]['entity']},\n{df.iloc[1]['entity']},\n{df.iloc[2]['entity']}"
+		answer = f"\nHere are a few possible answers:\n{df.iloc[0]['entity']}"
 
 		# return the answer
 		return answer
@@ -168,10 +188,10 @@ class SimpleChatbot:
 		best_val = -1
 		best_match = None
 
-		for r in response_set:
+		for r in response_set.itertuples():
 
 			keywords = set(word_tokenize(
-				r[1].replace('\'', '').replace(',', '')))
+				r.keywords.replace('\'', '').replace(',', '')))
 
 			tokens = set(filtered_tokens)
 
@@ -179,7 +199,7 @@ class SimpleChatbot:
 
 			if val > best_val:
 				best_val = val
-				best_match = r[0]
+				best_match = r.url
 
 		return best_match
 
@@ -302,3 +322,19 @@ class SimpleChatbot:
 		percent = round(similarity.ratio(), 2)
 
 		return percent
+
+
+
+
+	keywords = 'assdasdasdasdasdasdasdas'
+
+	def extact_email_phone_room(keywords):
+
+		email = ''
+		phone = ''
+		room = ''
+
+		
+
+		return {'EMAIL': email, 'PHONE': phone, 'ROOM': room} 
+

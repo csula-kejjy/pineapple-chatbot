@@ -1,6 +1,8 @@
 from difflib import SequenceMatcher
 import mysql.connector as mc
 import pandas as pd
+import os.path
+import Levenshtein as SequenceMatcher
 
 class MySQLStorage:
 	"""
@@ -42,60 +44,76 @@ class MySQLStorage:
 
 		# add '%' wildcard symbols to entity string
 		entity = '%' + entity + '%'
+		query = ("""
+					SELECT DISTINCT
+						url,
+						keywords 
+					FROM 
+						crawler 
+					WHERE 
+						url LIKE '%http://www.calstatela.edu/faculty/%'
+					AND 
+						keywords LIKE %s
+				""")
+		self.cursor.execute(query, (entity, ))
+		data = set(self.cursor.fetchall())
+
+		#print(f'\n{data}\n')
+
+		#print(len(data))
+
 
 		# check which intent is declared and set the base query for that intent
-		if intent == 'GetEmail':
-			query = ("""
-						SELECT DISTINCT
-							url,
-							keywords 
-						FROM 
-							crawler 
-						WHERE 
-							term = 'email'
-						OR
-							term = 'e-mail'
-						AND
-							term = %s
-						AND 
-							keywords LIKE %s
-					""")
-			self.cursor.execute(query, (entity, entity))
+		#if intent == 'GetEmail':
+		#	query = ("""
+		#				SELECT DISTINCT
+		#					url,
+		#					keywords 
+		#				FROM 
+		#					crawler 
+		#				WHERE 
+		#					term = 'email'
+		#				or
+		#					term = 'e-mail'
+		#				AND 
+		#					keywords LIKE %s
+		#			""")
+		#	self.cursor.execute(query, (entity,))
 
+		#elif intent == "GetPhoneNumber":
+		#	query = ("""
+		#				SELECT DISTINCT
+		#					url,
+		#					keywords 
+		#				FROM 
+		#					crawler 
+		#				WHERE 
+		#					term = 'phone'
+		#				AND 
+		#					keywords LIKE %s
+		#			""")
+		#	self.cursor.execute(query, (entity,))
 
-		elif intent == "GetPhoneNumber":
-			query = ("""
-						SELECT DISTINCT
-							url,
-							keywords 
-						FROM 
-							crawler 
-						WHERE 
-							term = phone
-						AND 
-							keywords LIKE %s
-					""")
-			self.cursor.execute(query, (entity,))
+		#elif intent == "GetOfficeRoom":
 
-		elif intent == "GetOfficeRoom":
-
-			query = ("""
-						SELECT DISTINCT
-							url,
-							keywords 
-						FROM 
-							crawler 
-						WHERE 
-							term = office
-						AND 
-							keywords LIKE %s
-					""")
-			self.cursor.execute(query, (entity,))
+		#	query = ("""
+		#				SELECT DISTINCT
+		#					url,
+		#					keywords 
+		#				FROM 
+		#					crawler 
+		#				WHERE 
+		#					term = 'office'
+		#				AND 
+		#					keywords LIKE %s
+		#			""")
+		#	self.cursor.execute(query, (entity,))
 				
+		## execute query and save data onto variable
+		#data = set(self.cursor.fetchall())
 
-		# execute query and save data onto variable
-		data = set(self.cursor.fetchall())
-		
+		#print(f'\n{data}\n')
+
 		# remove wildcard '%' symbols from entity string
 		entity = entity.replace('%', '')
 
@@ -137,17 +155,18 @@ class MySQLStorage:
 		data_df = pd.DataFrame(columns=['url', 'keywords', 'score'])
 
 		for (url, keywords) in data:
+			# parse the dataset into a single clean string 
 			text = ""
 			for word in keywords:
 				text += word
-
-			# parse the dataset into a single clean string 
 			text = text.replace("'", "").replace(",", "")
+			print(text)
+			#print(os.path.basename(url))
 			data_df = data_df.append(
 					{
 					 'url': url, 
 					 'keywords': text, 
-					 'score': round(SequenceMatcher(None, url, entity).ratio(), 3)*1000
+					 'score': round(SequenceMatcher.jaro(os.path.basename(url), entity), 3)*1000
 					 },
 					ignore_index=True)
 

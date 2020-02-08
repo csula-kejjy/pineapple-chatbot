@@ -1,6 +1,7 @@
 from difflib import SequenceMatcher
-import mysql.connector as mc
-import pandas as pd
+import mysql.connector as mc, pandas as pd, \
+	os.path, Levenshtein as lev
+
 
 class MySQLStorage:
 	"""
@@ -40,64 +41,24 @@ class MySQLStorage:
 		:type entity: str
 		"""
 
-		# add '%' wildcard symbols to entity string
-		entity = '%' + entity + '%'
+		query = ("""
+					SELECT DISTINCT
+						url,
+						keywords 
+					FROM 
+						crawler 
+					WHERE 
+						url LIKE '%http://www.calstatela.edu/faculty/%'
+					AND 
+						keywords LIKE %s
+				""")
 
-		# check which intent is declared and set the base query for that intent
-		if intent == 'GetEmail':
-			query = ("""
-						SELECT DISTINCT
-							url,
-							keywords 
-						FROM 
-							crawler 
-						WHERE 
-							term = 'email'
-						OR
-							term = 'e-mail'
-						AND
-							term = %s
-						AND 
-							keywords LIKE %s
-					""")
-			self.cursor.execute(query, (entity, entity))
-
-
-		elif intent == "GetPhoneNumber":
-			query = ("""
-						SELECT DISTINCT
-							url,
-							keywords 
-						FROM 
-							crawler 
-						WHERE 
-							term = phone
-						AND 
-							keywords LIKE %s
-					""")
-			self.cursor.execute(query, (entity,))
-
-		elif intent == "GetOfficeRoom":
-
-			query = ("""
-						SELECT DISTINCT
-							url,
-							keywords 
-						FROM 
-							crawler 
-						WHERE 
-							term = office
-						AND 
-							keywords LIKE %s
-					""")
-			self.cursor.execute(query, (entity,))
-				
-
-		# execute query and save data onto variable
+		self.cursor.execute(query, ('%' + entity + '%', ))
 		data = set(self.cursor.fetchall())
-		
-		# remove wildcard '%' symbols from entity string
-		entity = entity.replace('%', '')
+
+		#print(f'\n{data}\n')
+
+		#print(len(data))
 
 		# generate a DataFrame with three columns url, keywords, and score
 		data_df = self.generate_dataframe_with_scores(data, entity)
@@ -108,23 +69,32 @@ class MySQLStorage:
 		print(f'\n{data_df}\n')
 		return data_df
 
-	def get_urls2(self, tokens):	
+	def get_urls(self, tokens):
 		result = []
+		#print("tokens in get urls 2:", tokens)
 
+		#query each token to the database and return a set of urls and keywords
 		for t in tokens:
-			self.cursor.execute(self.base_query, (t,))
+			command = "select distinct url, keywords from crawler where keywords like " + "'%" + t + "%'"
+			print(f"\n{command}\n")
+			self.cursor.execute(command)
 			r = self.cursor.fetchall()
+			print(len(r), " results for", t)
 
+			# append r if items returned from query
 			if r:
 				result.append(set(r))
 
 		if not result:
 			return set()
 
-		if len(result) > 1:
-			return result[0].intersection(*result[1:])
-		else:
-			return result[0]
+		if len(result) > 0:
+			data = result[0].intersection(*result[1:])
+
+			# create a data frame with the data and tokens
+			result_df = self.generate_dataframe_with_scores2(data, tokens)
+			print(f'\n{result_df}\n')
+			return result_df.iloc[0]['url']
 
 	def generate_dataframe_with_scores(self, data, entity):
 		"""
@@ -137,20 +107,41 @@ class MySQLStorage:
 		data_df = pd.DataFrame(columns=['url', 'keywords', 'score'])
 
 		for (url, keywords) in data:
+			# parse the dataset into a single clean string 
 			text = ""
 			for word in keywords:
 				text += word
-
-			# parse the dataset into a single clean string 
 			text = text.replace("'", "").replace(",", "")
+			#print(text)
 			data_df = data_df.append(
 					{
 					 'url': url, 
 					 'keywords': text, 
-					 'score': round(SequenceMatcher(None, url, entity).ratio(), 3)*1000
+					 'score': round(self.scoring_algorithm(os.path.basename(url), entity), 3)
 					 },
 					ignore_index=True)
 
+		return data_df
+
+	def generate_dataframe_with_scores2(self, data, tokens):
+
+		data_df = pd.DataFrame(columns=["url","keywords","score"])
+		for t in tokens:
+			#print("Genereating for token:", t)
+			for (url,keywords) in data:
+				text = ""
+				for word in keywords:
+					text += word
+					
+				text = text.replace("'", "").replace(",", "")
+				#print(text)
+				data_df = data_df.append(
+					{
+						'url': url,
+						'keywords': text,
+						'score': round(lev.jaro(os.path.basename(url), t), 3)*1000
+					}, ignore_index=True)
+		data_df = data_df.sort_values(by=['score'], ascending=False)
 		return data_df
 
 	def generate_dataframe_without_scores(self, data):
@@ -178,4 +169,10 @@ class MySQLStorage:
 
 		return data_df
 
+	def scoring_algorithm(self, x, y):
 
+		score_jaro = lev.jaro(x, y) 
+		score_matcher = SequenceMatcher(None, x, y).ratio()
+
+		return ((score_jaro + score_matcher) / 2)
+		

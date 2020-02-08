@@ -1,9 +1,9 @@
 ﻿from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
-from difflib import SequenceMatcher
 from .mysqlstorage import MySQLStorage
-import mysql.connector as mc, re, spacy
-import pandas as pd
+from .extract_email_phone_room import extract_email_phone_room as extract
+import mysql.connector as mc, re, spacy, \
+	pandas as pd, Levenshtein as SequenceMatcher
 
 class SimpleChatbot:
 	"""
@@ -18,13 +18,38 @@ class SimpleChatbot:
 
 		self.nlp = spacy.load('en_pineapple')
 
+		self.stopWords = set(stopwords.words('english'))
+
 	def get_link(self, user_input):
 		"""
 		Return the a link or set of links based on the user's input.
 		:param user_input: the user's input received
 		:type user_input: str
 		"""
-		
+
+		# state that you made it this far
+		print(f"\nSuccessfully called get_link() with the parameter(s): \n\n\tuser_input -> {user_input}")
+
+		# tokenize the users input
+		tokens = [i for i in word_tokenize(user_input) if i.lower() not in self.stopWords]
+		print(f"\nTokenizing the user's input...\n\n\t{user_input} -> {tokens}")
+
+		# remove "'"
+		for t in tokens:
+			if "'" in t or "?" in t or "!" in t:
+				tokens.remove(t)
+		print(f"\nRemoving symbols from tokens...\n\n\t -> {tokens}")
+
+		# remove dr. from strings
+		filteredTokens = [t.replace("dr.", "") for t in tokens]
+		print(f"\nRemoving pre-fixes from tokens...\n\n\t -> {filteredTokens}")
+
+		# start looking for a link that may provide a Answer
+		response_set = self.storage.get_urls(filteredTokens)
+		print(f"\nBest Answer found: {response_set}")
+
+		return f"Here is a link with information closely matching your question: <a href='{response_set}' target='_blank'>{response_set}</a>"
+
 	def get_response(self, user_input, intent, entity):
 		"""
 		Return a direct answer to the user's request.
@@ -35,19 +60,35 @@ class SimpleChatbot:
 		:param entity: an entity derived from the user's input which orginates from Amazon's Lex services
 		:type entity: str
 		"""
-		if not entity:
-			return f"No entity was received from Amazon Lex services!"
-
-		# Split the entity at every ' ' character
-		# i.e 'this is some entity' -> ['this', 'is', 'some', 'entity']
-		entity = entity.split(" ")
+		print(f"""\nSuccessfully called get_response() with the parameter(s): 
+				  \n\n\tuser_input -> {user_input}
+				  \n\n\tintent -> {intent}
+				  \n\n\tentities -> {entity}""")
+		# Split the entity at every ' ' character and remove 's from each string
+		# i.e 'this is some entity's' -> ['this', 'is', 'some', 'entity']
+		entity = entity['PERSON'][0].replace("'s",'')
 
 		print(f'\nQuerying the database...\n\tintent: {intent}\n\tentity: {entity}')
 
 		# query the database based on the intent and the last element word from the entity array
-		database_df = self.storage.query(intent, entity[-1])
+		database_df = self.storage.query(intent, entity)
+
+		if database_df.empty:
+			return self.get_link(user_input)
 
 		print(f'\nResponse from database saved...')
+
+		print(f"\nSearching the top result...\n\n\t -> {database_df.iloc[0]['url']}")
+		email_phone_room = extract(database_df.iloc[0]['keywords'])
+		print(f"\nInformation found: {email_phone_room}")
+
+		if 'GetEmail' in intent:
+			return f"Here is the closed match for {entity}'s email: {email_phone_room['EMAIL'][0]}"
+		elif 'GetPhoneNumber' in intent:
+			return f"Here is the closed match for {entity}'s phone number: {email_phone_room['PHONE'][0]}"
+		elif 'GetOfficeNumber' in intent:
+			return f"Here is the closed match for {entity}'s office: {str(email_phone_room['ROOM'])}"
+			
 
 		if intent == 'GetEmail':
 			print(f'\nFinding three closest emails that match: {entity[-1]}')
@@ -63,22 +104,29 @@ class SimpleChatbot:
 		:param data: a dataframe which must contain a column named keywords. Keywords is a single string.
 		:type data: str
 		"""
-
+		print('test')
 		# Empty array to hold unique emails
 		no_dp_email = []
 
 		# Loop through each row in the dataframe...
 		for row in data.itertuples():
+			print('test')
 
 			# Parse through the row's keywords string for emails...
 			emails = re.findall("[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}", row.keywords)
+			print(emails)
+			print('test')
 
 			# For each email in the array...
 			for email in emails:
+				print('test')
+
 				email = str(email)
 
 				# Append this email onto the array if it is not a repeat
 				if email not in no_dp_email:
+					print('test')
+
 					no_dp_email.append(email)
 		
 		# return array of unique emails
@@ -95,23 +143,24 @@ class SimpleChatbot:
 
 		# Creating an empty Dataframe with column names only
 		df = pd.DataFrame(columns=['entity', 'score'])
+		print('test')
 
 		# Loop through each email...
 		for email in emails:
-
+			print('test')
 			# Append a new row at the bottom: (email, comparison between this email and the entity provided)
 			df = df.append(
 					{
 						'entity': email,
-						'score': round(SequenceMatcher(None, email, entity).ratio(), 3)*1000
+						'score': round(SequenceMatcher.jaro(email, entity), 3)*1000
 					},
 					ignore_index=True)
-
+			print('test')
 		# Sort the dataframe by highest to lowest score
 		df = df.sort_values(by=['score'], ascending=False)
-		
+		print('test')
 		# Concatinate a string with the top 3 scoring emails
-		answer = f"\nHere are a few possible answers:\n{df.iloc[0]['entity']},\n{df.iloc[1]['entity']},\n{df.iloc[2]['entity']}"
+		answer = f"\nHere are a few possible answers:\n{df.iloc[0]['entity']}"
 
 		# return the answer
 		return answer
@@ -168,10 +217,10 @@ class SimpleChatbot:
 		best_val = -1
 		best_match = None
 
-		for r in response_set:
+		for r in response_set.itertuples():
 
 			keywords = set(word_tokenize(
-				r[1].replace('\'', '').replace(',', '')))
+				r.keywords.replace('\'', '').replace(',', '')))
 
 			tokens = set(filtered_tokens)
 
@@ -179,7 +228,7 @@ class SimpleChatbot:
 
 			if val > best_val:
 				best_val = val
-				best_match = r[0]
+				best_match = r.url
 
 		return best_match
 
@@ -302,3 +351,19 @@ class SimpleChatbot:
 		percent = round(similarity.ratio(), 2)
 
 		return percent
+
+
+
+
+	keywords = 'assdasdasdasdasdasdasdas'
+
+	def extact_email_phone_room(keywords):
+
+		email = ''
+		phone = ''
+		room = ''
+
+		
+
+		return {'EMAIL': email, 'PHONE': phone, 'ROOM': room} 
+

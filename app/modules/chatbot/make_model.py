@@ -52,6 +52,10 @@ TRAIN_DATA = [
 
     ("His phone is missing", {
         'entities': []
+    }),
+
+	("vakis@calstatela.edu Vladimir Akis", {
+        'entities': [(0, 12, 'EMAIL'), (13, 25, 'PERSON')]
     })
 
 ]

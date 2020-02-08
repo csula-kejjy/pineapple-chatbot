@@ -28,7 +28,7 @@ def handle_message(request):
 			return HttpResponse(bot_response)
 		except Exception as e: 
 			print(e)
-			return HttpResponse('Cannot get response from Lex')
+			return HttpResponse('Something went wrong! Please try rephrasing your question.')
 
 	else:
 		print('Request is not a POST method!')
@@ -47,7 +47,7 @@ def handle_listen(request):
 
 		# with our microphone set as default...
 		with sr.Microphone() as source:
-			print("Say something!")
+			print("\nMicrophone is active. Program is listening for your response...")
 
 			r.adjust_for_ambient_noise(source)
 			# listen to the microphone and save the recording
@@ -59,33 +59,31 @@ def handle_listen(request):
 			# for testing purposes, we're just using the default API key
 			# to use another API key, use `r.recognize_google(audio, key="GOOGLE_SPEECH_RECOGNITION_API_KEY")`
 			# instead of `r.recognize_google(audio)`
-
-			print(f"Google Speech Recognition thinks you said: {r.recognize_google(audio)}")
+			
+			print(f"\nGoogle Speech Recognition thinks you said: {r.recognize_google(audio)}")
 			transcription = r.recognize_google(audio)
 			return HttpResponse(transcription)
 
 		except sr.UnknownValueError:
-			print("Google Speech Recognition could not understand audio")
-			return HttpResponse('Google Speech Recognition could not understand audio')
+			print("\nGoogle Speech Recognition could not understand audio")
+			return HttpResponse('\nGoogle Speech Recognition could not understand audio')
 		except sr.RequestError as e:
-			print(f"Could not request results from Google Speech Recognition service:\n {e}")
+			print(f"\nCould not request results from Google Speech Recognition service:\n {e}")
 			return HttpResponse(e)
 
 def call_lex(message):
 
-	#if not message: return
+	if not message: return "Please try asking me something next time... >:l"
 
 	nlp = spacy.load("en_pineapple")
 	
-	doc = nlp(message)
-
 	ent_dic = {}
 
-	for ent in doc.ents:
+	for ent in nlp(message).ents:
 
 		key = str(ent.label_) + ''
 		if ent.label_ in ent_dic:
-			ent_dic[key].append(str(ent)) if not str(ent) in ent_dic[key] else print(f'The entity: {ent} is already in the array')
+			ent_dic[key].append(str(ent)) if not str(ent) in ent_dic[key] else print(f'\nThe entity: {ent} is already in the array')
 		else: 
 			ent_dic[key] = [str(ent)]
 
@@ -96,59 +94,18 @@ def call_lex(message):
 	elif 'office' in message:
 		intent = 'GetOfficeNumber'
 	else:
-		intent = ''
+		intent = None
 
-	print(message)
-	print(intent)
-	print(ent_dic)
+	# summarize finds
+	print(f"""\nUser input:\n\n\t-> {message}
+			  \n\nIntent detected:\n\n\t-> {intent}
+			  \n\nEntities detected:\n\n\t-> {ent_dic}""")
 
-	print(f"""Based on the user's response: {message}...\nTheir intent is: {intent}\n
-		""")
-	if not intent:
-		# call bot's get_link() method, passing it the user's message
-		bot_response = str(bot.get_link(message))
-		print(bot_response)
-
-		return bot_response
+	# if no intent OR no entities were found...
+	if not intent or not ent_dic:
+		print("\nNo intent or entities were found. Calling get_link()...")
+		return bot.get_link(message)
+	# if BOTH a intent AND some entities were found...
 	else:
-		print(f'\n\n\n--\nYour intent is to: {intent}')
-		print(f'Your entity is: {ent_dic}\n--\n')
-
-		# call bot's get_response() method, passing it the user's message, intent and entity
+		print(f"\nAn intent and a set of entities were found. Calling get_response()...")
 		return bot.get_response(message, intent, ent_dic)
-
-
-	#input_dictionary = {'input': message}
-
-	#lex_response = runtime_client.post_text(
-	#			botName='CSULA_ITS_CHATBOT',
-	#			botAlias='CHATBOT_DEV',
-	#			userId='01',
-	#			inputText=str(input_dictionary['input'])
-	#		)
-
-	#print(f"\n\nLex's Response: {lex_response}\n\n")
-
-	#dialogState = str(lex_response.get('dialogState', 'Could not get dialogState from lex response json'))
-
-	#print(f"\n\nDialog State is: {dialogState}\n\n")
-	## if the dialog state is 'ReadyForFulfillment'
-	
-	#if dialogState == 'Fulfilled':
-
-	#	# from lex's response, get the 'intentName' parameter, otherwise throw an error.
-	#	intent = str(lex_response.get('intentName','Could not get intent.'))
-		
-	#	# from lex's response, get the 'slots' and 'name' parameters, otherwise throw an error.
-	#	entity = str(lex_response.get('slots','Could not get slot.').get('professor_name','Could not get slot data.'))
-			
-
-
-	#	print(f"\n\nSimpleChatbot's response: {bot_response}\n\n")
-		
-	#	return bot_response
-
-	## if the dialog state is NOT 'ReadyForFulfillment'
-
-
-

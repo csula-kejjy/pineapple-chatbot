@@ -1,10 +1,9 @@
 ﻿from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from .mysqlstorage import MySQLStorage
-import mysql.connector as mc, re, spacy
-import pandas as pd
-import Levenshtein as SequenceMatcher
 from .extract_email_phone_room import extract_email_phone_room as extract
+import mysql.connector as mc, re, spacy, \
+	pandas as pd, Levenshtein as SequenceMatcher
 
 class SimpleChatbot:
 	"""
@@ -19,13 +18,38 @@ class SimpleChatbot:
 
 		self.nlp = spacy.load('en_pineapple')
 
+		self.stopWords = set(stopwords.words('english'))
+
 	def get_link(self, user_input):
 		"""
 		Return the a link or set of links based on the user's input.
 		:param user_input: the user's input received
 		:type user_input: str
 		"""
-		
+
+		# state that you made it this far
+		print(f"\nSuccessfully called get_link() with the parameter(s): \n\n\tuser_input -> {user_input}")
+
+		# tokenize the users input
+		tokens = [i for i in word_tokenize(user_input) if i.lower() not in self.stopWords]
+		print(f"\nTokenizing the user's input...\n\n\t{user_input} -> {tokens}")
+
+		# remove "'"
+		for t in tokens:
+			if "'" in t or "?" in t or "!" in t:
+				tokens.remove(t)
+		print(f"\nRemoving symbols from tokens...\n\n\t -> {tokens}")
+
+		# remove dr. from strings
+		filteredTokens = [t.replace("dr.", "") for t in tokens]
+		print(f"\nRemoving pre-fixes from tokens...\n\n\t -> {filteredTokens}")
+
+		# start looking for a link that may provide a Answer
+		response_set = self.storage.get_urls(filteredTokens)
+		print(f"\nBest Answer found: {response_set}")
+
+		return f"Here is a link with information closely matching your question: <a href='{response_set}' target='_blank'>{response_set}</a>"
+
 	def get_response(self, user_input, intent, entity):
 		"""
 		Return a direct answer to the user's request.
@@ -36,11 +60,12 @@ class SimpleChatbot:
 		:param entity: an entity derived from the user's input which orginates from Amazon's Lex services
 		:type entity: str
 		"""
-		if not entity:
-			return f"No entity was received from Amazon Lex services!"
-
-		# Split the entity at every ' ' character
-		# i.e 'this is some entity' -> ['this', 'is', 'some', 'entity']
+		print(f"""\nSuccessfully called get_response() with the parameter(s): 
+				  \n\n\tuser_input -> {user_input}
+				  \n\n\tintent -> {intent}
+				  \n\n\tentities -> {entity}""")
+		# Split the entity at every ' ' character and remove 's from each string
+		# i.e 'this is some entity's' -> ['this', 'is', 'some', 'entity']
 		entity = entity['PERSON'][0].replace("'s",'')
 
 		print(f'\nQuerying the database...\n\tintent: {intent}\n\tentity: {entity}')
@@ -48,17 +73,21 @@ class SimpleChatbot:
 		# query the database based on the intent and the last element word from the entity array
 		database_df = self.storage.query(intent, entity)
 
-		print(f'\nResponse from database saved...')
-		if intent:
-			email_phone_room = extract(database_df.iloc[0]['keywords'])
-			print(email_phone_room)
+		if database_df.empty:
+			return self.get_link(user_input)
 
-			if 'GetEmail' in intent:
-				return email_phone_room['EMAIL']
-			elif 'GetPhoneNumber' in intent:
-				return email_phone_room['PHONE']
-			elif 'GetOfficeNumber' in intent:
-				return email_phone_room['ROOM']
+		print(f'\nResponse from database saved...')
+
+		print(f"\nSearching the top result...\n\n\t -> {database_df.iloc[0]['url']}")
+		email_phone_room = extract(database_df.iloc[0]['keywords'])
+		print(f"\nInformation found: {email_phone_room}")
+
+		if 'GetEmail' in intent:
+			return f"Here is the closed match for {entity}'s email: {email_phone_room['EMAIL'][0]}"
+		elif 'GetPhoneNumber' in intent:
+			return f"Here is the closed match for {entity}'s phone number: {email_phone_room['PHONE'][0]}"
+		elif 'GetOfficeNumber' in intent:
+			return f"Here is the closed match for {entity}'s office: {str(email_phone_room['ROOM'])}"
 			
 
 		if intent == 'GetEmail':

@@ -1,3 +1,9 @@
+###		
+#		IMPORTANT: This MUST be executed while in it's root directory.
+#				..pineapple-chatbot\spider\>  
+#		If you are NOT IN THIS DIRECTORY, YOU WILL GET ERRORS.
+###
+
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 import mysql.connector, sys, os.path
@@ -6,7 +12,7 @@ import mysql.connector, sys, os.path
 file = 'calstatela4/particalDict.txt'
 
 # MySQL object access database
-db = mysql.connector.connect(user='enriq', password='P@ssword1', database='chatbot_dev')
+db = mysql.connector.connect(user='', password='', database='chatbot_dev')
 cursor = db.cursor()
 
 # set of word to be removed from an array of strings

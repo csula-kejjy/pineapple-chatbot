@@ -108,7 +108,7 @@ def bayesian_naive_logic(question):
 		categories.append(word)
 
 	# keep an array with n number of elements (equal to 0)
-	scores = [0 for i in range(len(categories))] 
+	scores = [1 for i in range(len(categories))] 
 
 	# read dictionary from file
 	dict = read_from_file('dict.txt')
@@ -120,7 +120,9 @@ def bayesian_naive_logic(question):
 			k, i = dict[item]
 			if keyword in k:
 				ratio = k[keyword]/i
-				scores[categories.index(item.lower())] += ratio
+				scores[categories.index(item.lower())] *= ratio
+			else:
+				scores[categories.index(item.lower())] *= 0.000099
 	
 	print('\n')			
 	print(scores)
@@ -149,3 +151,8 @@ def main():
 
 if __name__ == '__main__':
 	main()
+
+
+# if the word is bold, a title, subtitle, etc, give it add it 1,2,3,4... etc.
+# get data which where we have questions that we know the answer too
+# FOR THE FUTURE: while scoring all the links, the links with the category we found get a bonus added/multipied to it.

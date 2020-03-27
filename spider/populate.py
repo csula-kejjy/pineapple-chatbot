@@ -9,7 +9,7 @@ from nltk.corpus import stopwords
 import mysql.connector, sys, os.path, numpy as np, ast
 
 # MySQL object access database
-db = mysql.connector.connect(user='enriq', password='P@ssword1', database='chatbot_dev')
+db = mysql.connector.connect(user='', password='', database='chatbot_dev')
 cursor = db.cursor()
 
 def populate():

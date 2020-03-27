@@ -2,7 +2,7 @@
 from nltk.corpus import stopwords
 from .mysqlstorage import MySQLStorage
 from .extract_email_phone_room import extract_email_phone_room as extract
-import mysql.connector as mc, re, spacy, \
+import mysql.connector as mc, re, spacy, ast, os, \
 	pandas as pd, Levenshtein as SequenceMatcher
 
 class SimpleChatbot:
@@ -22,7 +22,7 @@ class SimpleChatbot:
 
 	def get_link(self, user_input):
 		"""
-		Return the a link or set of links based on the user's input.
+		Return the a link or set of links based on the user's input.This function intents to incorperate the logic used in a Bayesian Naive Model.
 		:param user_input: the user's input received
 		:type user_input: str
 		"""
@@ -30,22 +30,14 @@ class SimpleChatbot:
 		# state that you made it this far
 		print(f"\nSuccessfully called get_link() with the parameter(s): \n\n\tuser_input -> {user_input}")
 
-		# tokenize the users input
-		tokens = [i for i in word_tokenize(user_input) if i.lower() not in self.stopWords]
-		print(f"\nTokenizing the user's input...\n\n\t{user_input} -> {tokens}")
+		# tokenize the user's input, removing words like "is", "the", "it" and so on...
+		tokens = self.tokenize(user_input)
 
-		# remove "'"
-		for t in tokens:
-			if "'" in t or "?" in t or "!" in t:
-				tokens.remove(t)
-		print(f"\nRemoving symbols from tokens...\n\n\t -> {tokens}")
-
-		# remove dr. from strings
-		filteredTokens = [t.replace("dr.", "") for t in tokens]
-		print(f"\nRemoving pre-fixes from tokens...\n\n\t -> {filteredTokens}")
+		# categorize the question
+		category = self.bayesian_naive_logic(tokens)
 
 		# start looking for a link that may provide a Answer
-		response_set = self.storage.get_urls(filteredTokens)
+		response_set = self.storage.get_urls(tokens, category)
 		print(f"\nBest Answer found: {response_set}")
 
 		return f"Here is a link with information closely matching your question: <a href='{response_set}' target='_blank'>{response_set}</a>"
@@ -192,6 +184,56 @@ class SimpleChatbot:
 		# return the dictionary of entities
 		return ent_dic
 
+	def bayesian_naive_logic(self, tokens):
+
+		# get categories from db
+		categories = self.storage.get_categories()
+
+		# keep an array with n number of elements (equal to 0)
+		scores = [1 for i in range(len(categories))] 
+
+		# read dictionary from file
+		data = self.read_from_file('/data_word_count.txt')
+
+		# for each keyword and category
+		for keyword in tokens:
+
+			for category in data: # word = (array of words -> array, total words in catgeory -> int)
+				word_array, total_words = data[category]
+
+				if keyword in word_array:
+					ratio = word_array[keyword] / total_words
+					scores[categories.index(category.lower())] *= ratio
+				else:
+					scores[categories.index(category.lower())] *= 0.00001
+
+		return categories[scores.index(max(scores))]
+
+	def tokenize(self, sentence):
+
+		# tokenize the users input
+		tokens = [i for i in word_tokenize(sentence) if i.lower() not in self.stopWords]
+		print(f"\nTokenizing the user's input...\n\n\t{sentence} -> {tokens}")
+
+		# remove "'"
+		for t in tokens:
+			if "'" in t or "?" in t or "!" in t:
+				tokens.remove(t)
+		print(f"\nRemoving symbols from tokens...\n\n\t -> {tokens}")
+
+		# remove dr. from strings
+		tokens = [t.replace("dr.", "") for t in tokens]
+		print(f"\nRemoving pre-fixes from tokens...\n\n\t -> {tokens}")
+
+		return tokens
+
+	def read_from_file(self, filename):
+
+		with open(os.path.dirname(os.path.realpath(__file__)) + filename, 'r') as f:
+			s = f.read()
+			data = ast.literal_eval(s)
+
+		return data
 	####################################
 	### FROM OLD simple_chatbot FILE ###
 	####################################

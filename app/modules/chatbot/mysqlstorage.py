@@ -69,30 +69,42 @@ class MySQLStorage:
 		print(f'\n{data_df}\n')
 		return data_df
 
-	def get_urls(self, tokens):
+	def get_urls(self, tokens, question_category):
 		result = []
-		#print("tokens in get urls 2:", tokens)
 
 		#query each token to the database and return a set of urls and keywords
 		for t in tokens:
-			command = "select distinct url, keywords from crawler where keywords like " + "'%" + t + "%'"
-			print(f"\n{command}\n")
-			self.cursor.execute(command)
-			r = self.cursor.fetchall()
-			print(len(r), " results for", t)
+			query = """
+					SELECT 
+						DISTINCT url, 
+						keywords, 
+						category
+					FROM
+						crawler 
+					WHERE
+						keywords LIKE %s
+					  """
+			self.cursor.execute(query, ('%' + t + '%', ))
+			data = self.cursor.fetchall()
 
-			# append r if items returned from query
-			if r:
-				result.append(set(r))
+			print(f"\n\n{len(data)}, results for, {t}")
 
+			# if data is NOT empty, append it
+			if data:
+				result.append(set(data))
+
+		# if all queries were empty and there is no data, return any empty set
 		if not result:
 			return set()
 
 		if len(result) > 0:
 			data = result[0].intersection(*result[1:])
 
+			if not data:
+				data = result[0].union(*result[1:])
+			
 			# create a data frame with the data and tokens
-			result_df = self.generate_dataframe_with_scores2(data, tokens)
+			result_df = self.generate_dataframe_with_scores2(data, tokens, question_category)
 			print(f'\n{result_df}\n')
 			return result_df.iloc[0]['url']
 
@@ -123,12 +135,12 @@ class MySQLStorage:
 
 		return data_df
 
-	def generate_dataframe_with_scores2(self, data, tokens):
+	def generate_dataframe_with_scores2(self, data, tokens, question_category):
 
-		data_df = pd.DataFrame(columns=["url","keywords","score"])
+		data_df = pd.DataFrame(columns=["url","score", "category"])
 		for t in tokens:
 			#print("Genereating for token:", t)
-			for (url,keywords) in data:
+			for (url,keywords, category) in data:
 				text = ""
 				for word in keywords:
 					text += word
@@ -138,8 +150,9 @@ class MySQLStorage:
 				data_df = data_df.append(
 					{
 						'url': url,
-						'keywords': text,
-						'score': round(lev.jaro(os.path.basename(url), t), 3)*1000
+						#'keywords': text,
+						'score': round(lev.jaro(os.path.basename(url), t), 3)*100 + 20 if not category == question_category else round(lev.jaro(os.path.basename(url), t), 3)*100,
+						'category': category
 					}, ignore_index=True)
 		data_df = data_df.sort_values(by=['score'], ascending=False)
 		return data_df
@@ -175,4 +188,21 @@ class MySQLStorage:
 		score_matcher = SequenceMatcher(None, x, y).ratio()
 
 		return ((score_jaro + score_matcher) / 2)
-		
+	
+	def get_categories(self):
+
+		query = ("""
+			SELECT DISTINCT
+				category
+			FROM 
+				crawler
+				""")
+
+		self.cursor.execute(query)
+		data = self.cursor.fetchall()
+
+		categories = []
+		for (word, ) in data:
+			categories.append(word)
+
+		return categories

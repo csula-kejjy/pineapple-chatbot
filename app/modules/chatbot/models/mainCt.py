@@ -89,11 +89,8 @@ for (keywords, category) in data:
 
 	for item in l:
 		# replace single quotes, double quotes, and brackets in the current string
-		item = item.replace("\'", "").replace("\"", "").replace("[", "").replace("]", "") 
+		item = item.replace("\'", "").replace("\"", "").replace("[", "").replace("]", "").replace(" ", '', 1)	 
 
-		# remove any leading spacing from the current string, up to the first occurance
-		if item[0] == " ": 
-				item = item.replace(" ", '', 1)	
 		
 		# if the string is numeric and it has more than one word or it's length is greater than 50
 		if len(item) >= 50:

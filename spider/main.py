@@ -5,7 +5,7 @@ from domain import *
 from general import *
 
 PROJECT_NAME = 'calstatela2'
-HOMEPAGE = 'http://calstatela.edu/'
+HOMEPAGE = ''
 DOMAIN_NAME = get_domain_name(HOMEPAGE)
 QUEUE_FILE = PROJECT_NAME + '/queue.txt'
 CRAWLED_FILE = PROJECT_NAME + '/crawled.txt'

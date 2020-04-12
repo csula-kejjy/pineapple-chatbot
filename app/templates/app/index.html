@@ -35,11 +35,12 @@
         <div class="d-flex align-items-stretch row">
 
             <!--column one, contains the content on the left hand side-->
-            <div class="instructions text-center col">
+
+            <div class="instructions text-center col" role="main" aria-labelledby="LeftHandCol">
                 <img class="logo" src="https://upload.wikimedia.org/wikipedia/en/f/f7/CSU%2C_Los_Angeles_seal.svg" alt="Cal state la logo" />
-                <h2>Welcome to CSULA's Pineapple Chatbot</h2>
+                <h1 id="LeftHandCol">Welcome to CSULA's Pineapple Chatbot</h1>
                 <p class="text-left">Lorem ipsum lacinia neque auctor tempor imperdiet fames sem viverra curae porttitor, etiam class aliquam proin sollicitudin metus nam at aenean feugiat aliquam, integer turpis congue lectus venenatis aenean senectus curabitur sit sem.</p>
-                <ui class="text-left">
+                <ul class="text-left">
                     <li class="bullets">
                         Senectus gravida ante nisi iaculis quam varius posuere dapibus ultricies, venenatis consequat ipsum elementum ad leo sapien ornare vitae, erat libero at a quis pretium nunc curabitur
                     </li>
@@ -52,11 +53,11 @@
                     <li class="bullets">
                         Aliquam iaculis vulputate vitae morbi eu velit condimentum, inceptos consectetur interdum eros nulla metus torquent congue
                     </li>
-                </ui>
+                </ul>
             </div>
 
             <!--column two, contains the content on the right hand side-->
-            <div class="d-flex flex-column border-left border-right border-dark col">
+            <div class="d-flex flex-column border-left border-right border-dark col" role="main" aria-labelledby="chatbox">
 
                 <!--box that holds the chatbot's and user's messages-->
                 <div id="chatbox" class="flex-grow-1 overflow-auto chatbox"></div>
@@ -83,7 +84,8 @@
                         {% csrf_token %}
 
                         <!--input field that takes the user's message-->
-                        <input type="text" class="form-control margin-right flex-grow-1" id="user_message" name="user_message" placeholder="Type your question here..." />
+                        <label for="user_message">UM</label>
+                        <input type="text" class="form-control margin-right flex-grow-1" id="user_message" name="user_message" placeholder="Type your question here...">
 
                         <!--submit button that submits the form-->
                         <button type="submit" class="csula-yellow btn btn-primary">Enter</button>
@@ -93,10 +95,10 @@
         </div>
     </div>
 
-     <!--renders template for the footer from base.html-->
+    <!--renders template for the footer from base.html-->
     {% block footer %}
     {% endblock footer %}
-    
+
     <!--import jquery-->
     <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
 
@@ -134,16 +136,16 @@
         //insert starting message from chatbot, it's not a call to Lex API.
         document.getElementById('chatbox').innerHTML +=
             `
-                    <div class="chatbot-msg-container">
-                        <img class="shadow border border-dark chatbot-icon" src="{% static '/images/pineapple_chatbot_logo.png' %}">
-                        <div class="shadow chatbot-message">
-                            Hello, how can I help you?
+                        <div class="chatbot-msg-container">
+                            <img class="shadow border border-dark chatbot-icon" alt="Pineapple chatbot logo" src="{% static '/images/pineapple_chatbot_logo.png' %}">
+                            <div class="shadow chatbot-message">
+                                Hello, how can I help you?
+                            </div>
+                            <time class="font-weight-light timestamp">
+                                {% now "f A" %}
+                            </time>
                         </div>
-                        <time class="font-weight-light timestamp">
-                            {% now "f A" %}
-                        </time>
-                    </div>
-                `;
+                    `;
 
         //update scroll position
         updateScroll();
@@ -160,16 +162,16 @@
             //insert the text submitted by the user into the chatbox
             document.getElementById('chatbox').innerHTML +=
                 `
-                        <div class="user-msg-container">
-                            <time class="font-weight-light timestamp">
-                                {% now "f A" %}
-                            </time>
-                            <div class="shadow user-message">
-                                ${user_message}
+                            <div class="user-msg-container">
+                                <time class="font-weight-light timestamp">
+                                    {% now "f A" %}
+                                </time>
+                                <div class="shadow user-message">
+                                    ${user_message}
+                                </div>
+                                <img class="shadow user-icon" alt="User icon" src="{% static '/images/user_icon.png' %}">
                             </div>
-                            <img class="shadow user-icon" src="{% static '/images/user_icon.png' %}">
-                        </div>
-                    `;
+                        `;
 
             document.getElementById('user_message').value = '';
 
@@ -194,16 +196,16 @@
                     //insert the response from either Lex or other modules
                     document.getElementById('chatbox').innerHTML +=
                         `
-                                <div class="chatbot-msg-container">
-                                    <img class="shadow border border-dark chatbot-icon" src="{% static '/images/pineapple_chatbot_logo.png' %}">
-                                    <div class="shadow chatbot-message">
-                                        ${data}
+                                    <div class="chatbot-msg-container">
+                                        <img class="shadow border border-dark chatbot-icon" src="{% static '/images/pineapple_chatbot_logo.png' %}">
+                                        <div class="shadow chatbot-message">
+                                            ${data}
+                                        </div>
+                                        <time class="font-weight-light timestamp">
+                                            {% now "f A" %}
+                                        </time>
                                     </div>
-                                    <time class="font-weight-light timestamp">
-                                        {% now "f A" %}
-                                    </time>
-                                </div>
-                            `;
+                                `;
 
                     //update scroll position
                     updateScroll();
@@ -224,18 +226,18 @@
                     console.log(transcription);
                     listenStyle("OFF");
                     document.getElementById('chatbox').innerHTML +=
-                    `
-                        <div class="user-msg-container">
-                            <time class="font-weight-light timestamp">
-                                {% now "f A" %}
-                            </time>
-                            <div class="shadow user-message">
-                                ${transcription}
+                        `
+                            <div class="user-msg-container">
+                                <time class="font-weight-light timestamp">
+                                    {% now "f A" %}
+                                </time>
+                                <div class="shadow user-message">
+                                    ${transcription}
+                                </div>
+                                <img class="shadow user-icon" src="{% static '/images/user_icon.png' %}">
                             </div>
-                            <img class="shadow user-icon" src="{% static '/images/user_icon.png' %}">
-                        </div>
-                    `;
-                    
+                        `;
+
                     $.ajax({
                         type: 'POST',
                         url: '/message',
@@ -246,16 +248,16 @@
                         success: function (data) {
                             document.getElementById('chatbox').innerHTML +=
                                 `
-                                <div class="chatbot-msg-container">
-                                    <img class="shadow border border-dark chatbot-icon" src="{% static '/images/pineapple_chatbot_logo.png' %}">
-                                    <div class="shadow chatbot-message">
-                                        ${data}
+                                    <div class="chatbot-msg-container">
+                                        <img class="shadow border border-dark chatbot-icon" src="{% static '/images/pineapple_chatbot_logo.png' %}">
+                                        <div class="shadow chatbot-message">
+                                            ${data}
+                                        </div>
+                                        <time class="font-weight-light timestamp">
+                                            {% now "f A" %}
+                                        </time>
                                     </div>
-                                    <time class="font-weight-light timestamp">
-                                        {% now "f A" %}
-                                    </time>
-                                </div>
-                            `;
+                                `;
                         }
                     });
 

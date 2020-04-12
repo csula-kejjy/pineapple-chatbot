@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 from link_finder import LinkFinder
 from domain import *
 from general import *
+from nltk.corpus import stopwords
 
 import re
 
@@ -149,7 +150,7 @@ class Spider:
                 line = line.strip()
                 # print(line)
                 if line:
-                    line = line.replace('"', '').replace("'", "").replace(',', '').replace('/', '').replace('[', '').replace(']', '')
+                    line = line.replace('\"', '').replace('\'', '').replace(',', '')
                     keyword_list.append(line)
 
 
@@ -162,36 +163,36 @@ class Spider:
 # italic = +2
 # ##################################################################################################
             for i in soup.find_all('h1'):
-                keyword = i.text.strip()
-                keyword = clean_string(keyword)
+                # keyword = i.text.strip()
+                # keyword = clean_string(keyword)
+                # keyword = keyword.replace('\"', '').replace('\'', '').replace(',', '')
+                keyword = Spider.removeStopWord(i)
+
                 if (len(keyword) > 0):
                     for j in range(10):
                         keyword_list.append(keyword)
 
             for i in soup.find_all('h2'):
-                keyword = i.text.strip()
-                keyword = clean_string(keyword)
+                keyword = Spider.removeStopWord(i)
                 if (len(keyword) > 0):
                     for j in range(7):
                         keyword_list.append(keyword)
 
             for i in soup.find_all('h3'):
-                keyword = i.text.strip()
-                keyword = clean_string(keyword)
+                keyword = Spider.removeStopWord(i)
                 if (len(keyword) > 0):
                     for j in range(5):
                         keyword_list.append(keyword)
 
             for i in soup.find_all('strong'):
-                keyword = i.text.strip()
-                keyword = clean_string(keyword)
+                keyword = Spider.removeStopWord(i)
                 if (len(keyword) > 0):
                     for j in range(3):
                         keyword_list.append(keyword)
 
             for i in soup.find_all('i'):
-                keyword = i.text.strip()
-                keyword = clean_string(keyword)
+                keyword = Spider.removeStopWord(i)
+
                 if (len(keyword) > 0):
                     for j in range(2):
                         keyword_list.append(keyword)

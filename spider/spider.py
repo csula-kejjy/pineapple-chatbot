@@ -142,17 +142,14 @@ class Spider:
 
             htmlSplit = hugeString.split('\n')
 
-            # ['Jump navigation', 'Skip content', 'Department Computer Science',
             htmlSplit = Spider.removeStopWord(htmlSplit)
 
             keyword_list = []
             for line in htmlSplit:
                 line = line.strip()
-                # print(line)
                 if line:
                     line = line.replace('\"', '').replace('\'', '').replace(',', '')
                     keyword_list.append(line)
-
 
 ##################################################################################################
 # Add extract data for database
@@ -162,10 +159,8 @@ class Spider:
 # strong = +3
 # italic = +2
 # ##################################################################################################
+
             for i in soup.find_all('h1'):
-                # keyword = i.text.strip()
-                # keyword = clean_string(keyword)
-                # keyword = keyword.replace('\"', '').replace('\'', '').replace(',', '')
                 keyword = Spider.removeStopWord(i)
 
                 if (len(keyword) > 0):
@@ -196,6 +191,7 @@ class Spider:
                 if (len(keyword) > 0):
                     for j in range(2):
                         keyword_list.append(keyword)
+
 ##################################################################################################
 ##################################################################################################
 
@@ -206,9 +202,7 @@ class Spider:
             keywords = {str(keyword_list)}
 
         except Exception as e:
-            #print(str(e))
             pass
-            #return set()
         return keywords
 
     # Converts raw response data into readable information and checks for proper html formatting
@@ -224,7 +218,6 @@ class Spider:
             finder.feed(html_string)
         except Exception as e:
             pass
-            #print(str(e))
             return set()
         return finder.page_links()
 

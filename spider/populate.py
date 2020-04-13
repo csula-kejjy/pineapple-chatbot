@@ -15,7 +15,7 @@ cursor = db.cursor()
 def populate():
 
 	# file to be iterated through
-	file = 'calstatela4/particalDict.txt'
+	file = 'calstatela2/testing_set_data.txt'
 
 	# query to populate the database
 	query = "INSERT INTO crawler (url, keywords, category, subcategory) VALUES (%s, %s, %s, %s)"
@@ -111,7 +111,7 @@ def generate_word_count():
 
 		print(urlDic)
 
-	save_to_file(urlDic, "data_word_count.txt")
+	save_to_file(urlDic, "../app/modules/chatbot/data_word_count.txt")
 
 def save_to_file(data, filename):
 	f = open(filename, "w")

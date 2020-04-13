@@ -5,63 +5,61 @@ import random
 from pathlib import Path
 import spacy
 from spacy.util import minibatch, compounding
-from .mysqlstorage import MySQLStorage
 
 
 # new entity label
 LABEL = 'ROOM'
 LABEL_2 = 'PHONE'
+LABEL_3 = 'EMAIL'
 
 # training data
 # Note: If you're using an existing model, make sure to mix in examples of
 # other entity types that spaCy correctly recognized before. Otherwise, your
 # model might learn the new type, but "forget" what it previously knew.
 # https://explosion.ai/blog/pseudo-rehearsal-catastrophic-forgetting
-#TRAIN_DATA = [
+TRAIN_DATA = [
 
-#    ("E&T 322 is the computer science office", {
-#        'entities': [(0, 7, 'ROOM')]
-#    }),
+    ("E&T 322 is the computer science office", {
+        'entities': [(0, 7, 'ROOM')]
+    }),
 
-#    ("Which room is Dr.Kangs office", {
-#        'entities': []
-#    }),
+    ("Which room is Dr.Kangs office", {
+        'entities': []
+    }),
 
-#    ("The senior design room is in E&T B10", {
-#        'entities': [(29, 36, 'ROOM')]
-#    }),
+    ("The senior design room is in E&T B10", {
+        'entities': [(29, 36, 'ROOM')]
+    }),
 
-#    ("The office of Dr.Pamula is E&T A324", {
-#        'entities': [(27, 35, 'ROOM')]
-#    }),
+    ("The office of Dr.Pamula is E&T A324", {
+        'entities': [(27, 35, 'ROOM')]
+    }),
 
-#    ("Dr.Zilong's office is in E&T A329", {
-#        'entities': [(25, 33, 'ROOM')]
-#    }),
+    ("Dr.Zilong's office is in E&T A329", {
+        'entities': [(25, 33, 'ROOM')]
+    }),
 
-#    ("Phone (342) 093-4325", {
-#        'entities': [(6, 20, 'PHONE')]
-#    }),
+    ("Phone (342) 093-4325", {
+        'entities': [(6, 20, 'PHONE')]
+    }),
 
-#    ("Office: E&T A327 Phone: (818) 343-6689 E-mail: zye5@calstatela.edu", {
-#        'entities': [(8, 16, 'ROOM'), (24, 38, 'PHONE')]
-#    }),
+    ("Office: E&T A327 Phone: (818) 343-6689 E-mail: zye5@calstatela.edu", {
+        'entities': [(8, 16, 'ROOM'), (24, 38, 'PHONE')]
+    }),
 
-#    ("My phone number is (917) 343-0393", {
-#        'entities': [(19, 33, 'PHONE')]
-#    }),
+    ("My phone number is (917) 343-0393", {
+        'entities': [(19, 33, 'PHONE')]
+    }),
 
-#    ("His phone is missing", {
-#        'entities': []
-#    }),
+    ("His phone is missing", {
+        'entities': []
+    }),
 
-#	("vakis@calstatela.edu Vladimir Akis", {
-#        'entities': [(0, 12, 'EMAIL'), (13, 25, 'PERSON')]
-#    })
+	("vakis@calstatela.edu Vladimir Akis", {
+        'entities': [(0, 12, 'EMAIL'), (13, 25, 'PERSON')]
+    })
 
-#]
-
-TRAIN_DATA = formatTrainingData()
+]
 
 
 @plac.annotations(
@@ -70,7 +68,7 @@ TRAIN_DATA = formatTrainingData()
     output_dir=("Optional output directory", "option", "o", Path),
     n_iter=("Number of training iterations", "option", "n", int))
 
-def main(model=None, new_model_name='pineapple', output_dir='./models/pineapple_1_0', n_iter=10):
+def main(model=None, new_model_name='pineapple', output_dir='./pineapple_1_0', n_iter=10):
     """Set up the pipeline and entity recognizer, and train the new entity."""
     # if model is not None:
     #     nlp = spacy.load('en')
@@ -136,41 +134,6 @@ def main(model=None, new_model_name='pineapple', output_dir='./models/pineapple_
         doc2 = nlp2(test_text)
         for ent in doc2.ents:
             print(ent.label_, ent.text)
-
-def formatTrainingData():
-	"""
-	parses the data from the database into the following format:
-
-		(STRING, DICTIONARY -> {'entities': 
-									ARRAY -> [ 
-												SET -> (INT, INT, STRING), 
-												SET -> (INT, INT, STRING),
-												... 
-											 ]
-								}
-		)
-
-	Returns the data in a set.
-	"""
-
-	training_data = set()
-	database = MySQLStorage(user='', password='', database='chatbot_dev')
-
-	query("""SELECT * FROM crawler""")
-	database.cursor.execute(query)
-	data = set(database.cursor.fetchall())
-
-	for (idcrawler, url, keywords, category, subcategory) in data:
-		text = ""
-		for word in keywords:
-			text += word
-		text = text.replace("'", "").replace(",", "")
-		# parse data into training data
-		print("test")
-
-	# maybe save this into a text file...?
-	print("test")
-	return training_data;
 
 if __name__ == '__main__':
     plac.call(main)

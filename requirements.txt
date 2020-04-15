@@ -15,14 +15,17 @@ ftfy==4.4.3
 html5lib==1.0.1
 idna==2.8
 jmespath==0.9.4
+lxml==4.5.0
 msgpack==0.6.2
 msgpack-numpy==0.4.4.3
 msgpack-python==0.5.6
 murmurhash==0.28.0
+mysql-connector==2.2.9
 mysql-connector-python==8.0.17
 mysqlclient==1.4.4
 nltk==3.4.5
 numpy==1.17.2
+pandas==1.0.2
 pathlib==1.0.1
 plac==0.9.6
 pprint==0.1
@@ -31,6 +34,7 @@ protobuf==3.10.0
 pyasn1==0.4.7
 PyAudio==0.2.11
 python-dateutil==2.8.0
+python-Levenshtein==0.12.0
 pytz==2019.3
 PyYAML==5.1.2
 rake-nltk==1.0.4
@@ -50,6 +54,7 @@ toolz==0.10.0
 tqdm==4.36.1
 ujson==1.35
 urllib3==1.25.6
+virtualenv==16.7.8
 wasabi==0.2.2
 wcwidth==0.1.7
 webencodings==0.5.1

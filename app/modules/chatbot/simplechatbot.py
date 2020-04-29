@@ -34,6 +34,7 @@ class SimpleChatbot:
 		tokens = self.tokenize(user_input)
 
 		# categorize the question
+		print(f"\nIdentifying question's category...")
 		category = self.bayesian_naive_logic(tokens)
 
 		# start looking for a link that may provide a Answer
@@ -207,6 +208,7 @@ class SimpleChatbot:
 				else:
 					scores[categories.index(category.lower())] *= 0.00001
 
+		print(f"\nThe question's category is: {categories[scores.index(max(scores))]}")
 		return categories[scores.index(max(scores))]
 
 	def tokenize(self, sentence):

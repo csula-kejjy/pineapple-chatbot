@@ -109,7 +109,7 @@ def generate_word_count():
 						}
 					 )
 
-		print(urlDic)
+		# print(urlDic)
 
 	save_to_file(urlDic, "../app/modules/chatbot/data_word_count.txt")
 

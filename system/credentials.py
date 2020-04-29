@@ -4,5 +4,5 @@ class Credentials:
 		self.database_name = ''
 		self.user = ''
 		self.password = ''
-		self.host = 'localhost'
+		self.host = ''
 

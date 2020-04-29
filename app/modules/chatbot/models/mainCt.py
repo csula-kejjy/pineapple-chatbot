@@ -54,10 +54,10 @@ def create_model(cursor, td):
 
 #connect to mysql database
 mydb = mysql.connector.connect(
-	host = "localhost",
-	user = "enriq",
-	password="P@ssword1",
-	database="chatbot_dev"
+	host = "",
+	user = "",
+	password="",
+	database=""
 )
 
 # path for file to be written, current directory...

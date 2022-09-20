@@ -53,7 +53,7 @@ thinc==7.1.1
 toolz==0.10.0
 tqdm==4.36.1
 ujson==1.35
-urllib3==1.25.6
+urllib3==1.26.5
 virtualenv==16.7.8
 wasabi==0.2.2
 wcwidth==0.1.7

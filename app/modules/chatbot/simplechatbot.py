@@ -30,7 +30,7 @@ class SimpleChatbot:
 		# state that you made it this far
 		print(f"\nSuccessfully called get_link() with the parameter(s): \n\n\tuser_input -> {user_input}")
 
-		# tokenize the user's input, removing words like "is", "the", "it" and so on...
+		# tokenize the user's input, removing words like "is", "the", "it" and so on...asdadadsasdasd
 		tokens = self.tokenize(user_input)
 
 		# categorize the question

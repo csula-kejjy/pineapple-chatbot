@@ -23,7 +23,7 @@ class SimpleChatbot:
 	def get_link(self, user_input):
 		"""
 		Return the a link or set of links based on the user's input.This function intents to incorperate the logic used in a Bayesian Naive Model.
-		:param user_input: the user's input received
+		:param user_input: the user's input receivedtest
 		:type user_input: str
 		"""
 
